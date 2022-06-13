@@ -16,6 +16,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -25,11 +26,13 @@ import org.openqa.selenium.chrome.ChromeDriver;
 public class TestInputDb {
 
 	private WebDriver driver;
+	private JavascriptExecutor jse;
 
 	@BeforeAll
 	public void createDriver() {
 		System.setProperty("webdriver.chrome.driver", "/chromedriver.exe");
 		driver = new ChromeDriver();
+		jse = (JavascriptExecutor) driver;
 		driver.manage().window().maximize();
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 	}
@@ -40,6 +43,13 @@ public class TestInputDb {
 	public void gotoWeb_andLogin_withUsername_withPassword() {
 		driver.get("http://localhost/cicool/");
 
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		driver.findElement(By.cssSelector(".fa.fa-sign-in")).click();
 
 		driver.findElement(By.name("username")).clear();
@@ -61,14 +71,15 @@ public class TestInputDb {
 
 		driver.findElement(By.cssSelector("tbody tr a:nth-child(1)")).click();
 
-//		driver.findElement(By.cssSelector("#btn_add_new")).click();
+		driver.findElement(By.cssSelector("#btn_add_new")).click();
 	}
 
-	@DisplayName("Input Data")
+	@Disabled
+	@DisplayName("Input Data and see list")
 	@Order(3)
 	@ParameterizedTest
 	@CsvFileSource(resources = "/absensi.csv", delimiter = ';', numLinesToSkip = 1)
-	public void inputDataCRUD(String no, String uname, String email, String location) {
+	public void inputDataCRUD_withList(String no, String uname, String email, String location) {
 		driver.findElement(By.cssSelector("#btn_add_new")).click();
 		driver.findElement(By.cssSelector("#username")).click();
 		driver.findElement(By.cssSelector("#username")).sendKeys(uname);
@@ -80,7 +91,31 @@ public class TestInputDb {
 		driver.findElement(By.cssSelector("#location")).sendKeys(location);
 		driver.findElement(By.xpath("//a[@id='btn_save']")).click();
 	}
+	
+	@DisplayName("Input data without see list")
+	@Order(3)
+	@ParameterizedTest
+	@CsvFileSource(resources = "/absensi.csv", delimiter = ';', numLinesToSkip = 1)
+	public void inputDataCRUD_withoutList(String no, String uname, String email, String location) {
+		
+		driver.findElement(By.cssSelector("#username")).click();
+		driver.findElement(By.cssSelector("#username")).sendKeys(uname);
 
+		driver.findElement(By.cssSelector("#email")).click();
+		driver.findElement(By.cssSelector("#email")).sendKeys(email);
+
+		driver.findElement(By.cssSelector("#location")).click();
+		driver.findElement(By.cssSelector("#location")).sendKeys(location);
+		driver.findElement(By.xpath("//button[@id='btn_save']")).click();
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Disabled
 	@DisplayName("Show All Data")
 	@Order(4)
 	@Test
@@ -113,8 +148,9 @@ public class TestInputDb {
 		System.out.println("Lokasi data terakhir adalah " + lstLocation.get(lstLocation.size() - 1).getText());
 		System.out.println();
 
+//		driver.findElement(By.cssSelector(".btn.btn-flat.btn-success[href='http://localhost:80/cicool/administrator/absensi/export?q=&f=']")).click();
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(300);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -127,9 +163,23 @@ public class TestInputDb {
 	@Order(5)
 	@Test
 	public void deleteDataCRUD() {
+		driver.findElement(By.cssSelector("#btn_cancel")).click();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		driver.findElement(By.cssSelector(".confirm")).click();
+		jse.executeScript("scroll(0, 150);");
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		driver.findElement(By.cssSelector(".iCheck-helper")).click();
 		driver.findElement(By.cssSelector("#apply")).click();
-		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -144,6 +194,27 @@ public class TestInputDb {
 			e.printStackTrace();
 		}
 		
+//		driver.close();
+	}
+	
+	@DisplayName("Logout")
+	@Order(6)
+	@Test
+	public void logout() {
+		driver.findElement(By.cssSelector("img.user-image")).click();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		driver.findElement(By.cssSelector(".pull-right a.btn.btn-default.btn-flat")).click();
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		driver.close();
 	}
 }
